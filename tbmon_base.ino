@@ -1,7 +1,5 @@
 /**
- * An Mirf example which copies back the data it recives.
  *
- * Pins:
  * Hardware SPI:
  * MISO -> 12
  * MOSI -> 11
@@ -21,8 +19,10 @@
 //GSM driver pins
 byte gsmDriverPin[3] = {3,4,5};
 
+//Xively API Key
+char xApiKey[49] = "CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS";
 //byte data[Mirf.payload]; // data buffer - unused currently
-float data; // recieved data
+//float data; // recieved data
 
 void setup(){
   
@@ -68,11 +68,13 @@ void setup(){
 }
 
 void loop(){
- pollSensor();
+  
+ postData(pollSensor());
+ delay(10000);
  
 }
 
-void pollSensor(){
+float pollSensor(){
  
   float data;
   
@@ -113,5 +115,58 @@ void pollSensor(){
      */
       
     //Serial.println("Reply sent.");
+    
+    return data;
   }
+  
+}
+
+void postData(float senseData){
+ 
+  Serial.println("AT+CGATT=1"); //attach gprs service
+  delay(500);
+  
+  Serial.println("AT+CGDCONT=1,\"IP\",\"wap.cingular\""); //defince PDP context
+  delay(500);
+  
+  Serial.println("AT+CSTT=\"wap.cingular\",\"wap(at)cingulargprs.com\",\"cingular1\""); //start task
+  delay(500);
+  
+  Serial.println("AT+CIICR"); //bring up connection
+  delay(1000);
+  
+  Serial.println("AT+CDNSCFG=\"8.8.8.8\""); //config DNS
+  delay(500);
+  
+  Serial.println("AT+CIPSTART=\"TCP\",\"ec2-54-242-171-87.compute-1.amazonaws.com\",\"80\""); //connect to server
+  delay(500);
+  
+  Serial.println("AT+CIPSEND"); //start sending data
+  delay(500);
+  
+  // building HTTP header
+  Serial.print("GET /xivelyPut/X-ApiKey=");
+  delay(250);
+  Serial.print(xApiKey);
+  delay(250);
+  Serial.print("&DATA=");
+  delay(250);
+  Serial.print(senseData);
+  delay(250);
+  Serial.println(" HTTP/1.1");
+  delay(250);
+  Serial.println("Host: ec2-54-242-171-87.compute-1.amazonaws.com");
+  delay(250);
+  Serial.println("Keep-Alive: 300");
+  delay(250);
+  Serial.println("Connection: keep-alive");
+  
+  // done building HTTP header
+  Serial.print(0x1A); //send CTRL-Z to terminate data input and send data
+  delay(1000);
+  
+  Serial.println("AT+CIPCLOSE"); //close the connection
+  delay(500);
+  Serial.println("AT+CIPSHUT=0"); //shutdown IP
+  delay(500);
 }
