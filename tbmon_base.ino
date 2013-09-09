@@ -1,16 +1,10 @@
-/**
- *
- * Hardware SPI:
- * MISO -> 12
- * MOSI -> 11
- * SCK -> 13
- *
- * Configurable:
- * CE -> 8
- * CSN -> 7
- *
+/* Requires Arduino IDE and MIRF library
+ * MIRF lib: https://github.com/aaronds/arduino-nrf24l01/tree/master/Mirf
+ * NOTE: It may be necessary to modify MirfHardwareSpiDriver.cpp with; 
+ * SPI.setClockDivider(SPI_CLOCK_DIV2);
+ * to increase stability. 
  */
-
+ 
 #include <SPI.h>
 #include <Mirf.h>
 #include <nRF24L01.h>
@@ -43,6 +37,7 @@ void setup(){
   delay(5000);
   delay(5000);
 
+  //Teensy pin config
   //Mirf.cePin = 9;
   //Mirf.csnPin = 10;   
   
