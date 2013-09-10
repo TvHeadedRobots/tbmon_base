@@ -117,45 +117,42 @@ float pollSensor(){
 }
 
 void postData(float senseData){
- 
+  
+  Serial.println("AT+CMEE=1");
+  delay(500); 
+  
   Serial.println("AT+CGATT=1"); //attach gprs service
   delay(500);
   
-  Serial.println("AT+CGDCONT=1,\"IP\",\"wap.cingular\""); //defince PDP context
+  Serial.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\""); //Set bearer connection type
   delay(500);
   
-  Serial.println("AT+CSTT=\"wap.cingular\",\"wap(at)cingulargprs.com\",\"cingular1\""); //start task
+  Serial.println("AT+SAPBR=3,1,\"APN\",\"wap.cingular\""); //set bearer mode
   delay(500);
   
-  Serial.println("AT+CIICR"); //bring up connection
+  Serial.println("AT+SAPBR=3,1,\"USER\",\"wap@cingulargprs.com\""); //set bearer user
   delay(1000);
   
-  Serial.println("AT+CDNSCFG=\"8.8.8.8\""); //config DNS
+  Serial.println("AT+SAPBR=3,1,\"PWD\",\"cingular1\""); //Set bearer pass
   delay(500);
   
-  Serial.println("AT+CIPSTART=\"TCP\",\"ec2-54-242-171-87.compute-1.amazonaws.com\",\"80\""); //connect to server
+  Serial.println("AT+SAPBR=1,1"); //bring up connection
+  delay(1500);
+  
+  Serial.println("AT+HTTPINIT"); //Init HTTP engine
   delay(500);
   
-  Serial.println("AT+CIPSEND"); //start sending data
+  //set URL
+  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=volts&DATA=\"");
+  Serial.println(senseData);
   delay(500);
   
-  // building HTTP header
-  Serial.print("GET /xivelyPut/X-ApiKey=");
-  delay(250);
-  Serial.print(xApiKey);
-  delay(250);
-  Serial.print("&DATA=");
-  delay(250);
-  Serial.print(senseData);
-  delay(250);
-  Serial.println(" HTTP/1.1");
-  delay(250);
-  Serial.println("Host: ec2-54-242-171-87.compute-1.amazonaws.com");
-  delay(250);
-  Serial.println("Keep-Alive: 300");
-  delay(250);
-  Serial.println("Connection: keep-alive");
+  Serial.println("AT+HTTPACTION=0"); //do HTTP get
+  delay(1500);
   
+  Serial.print("AT+HTTPREAD");
+  delay(1500);
+ 
   // done building HTTP header
   Serial.print(0x1A); //send CTRL-Z to terminate data input and send data
   delay(1000);
