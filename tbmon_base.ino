@@ -58,8 +58,6 @@ void setup(){
   
   // Write channel and payload config then power up reciver.
   Mirf.config();
-  
-  Serial.println("Listening..."); 
 }
 
 void loop(){
@@ -119,46 +117,42 @@ float pollSensor(){
 void postData(float senseData){
   
   Serial.println("AT+CMEE=1");
-  delay(500); 
+  delay(1000); 
   
   Serial.println("AT+CGATT=1"); //attach gprs service
-  delay(500);
+  delay(1000);
   
   Serial.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\""); //Set bearer connection type
-  delay(500);
+  delay(1000);
   
   Serial.println("AT+SAPBR=3,1,\"APN\",\"wap.cingular\""); //set bearer mode
-  delay(500);
+  delay(1000);
   
   Serial.println("AT+SAPBR=3,1,\"USER\",\"wap@cingulargprs.com\""); //set bearer user
   delay(1000);
   
   Serial.println("AT+SAPBR=3,1,\"PWD\",\"cingular1\""); //Set bearer pass
-  delay(500);
+  delay(1000);
   
   Serial.println("AT+SAPBR=1,1"); //bring up connection
   delay(1500);
   
   Serial.println("AT+HTTPINIT"); //Init HTTP engine
-  delay(500);
+  delay(1500);
   
   //set URL
   Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=volts&DATA=\"");
-  Serial.println(senseData);
-  delay(500);
-  
-  Serial.println("AT+HTTPACTION=0"); //do HTTP get
-  delay(1500);
-  
-  Serial.print("AT+HTTPREAD");
-  delay(1500);
- 
-  // done building HTTP header
-  Serial.print(0x1A); //send CTRL-Z to terminate data input and send data
+  Serial.print(senseData);
+  Serial.println("\"");
   delay(1000);
   
-  Serial.println("AT+CIPCLOSE"); //close the connection
-  delay(500);
-  Serial.println("AT+CIPSHUT=0"); //shutdown IP
-  delay(500);
+  Serial.println("AT+HTTPACTION=0"); //do HTTP get
+  delay(2500);
+  
+  Serial.println("AT+HTTPREAD");
+  delay(2500);
+
+  Serial.println("AT+HTTPTERM");
+  delay(1000);
+ 
 }
