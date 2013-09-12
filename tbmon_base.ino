@@ -10,6 +10,7 @@
 #include <nRF24L01.h>
 #include <MirfHardwareSpiDriver.h>
 
+
 //GSM driver pins
 byte gsmDriverPin[3] = {3,4,5};
 
@@ -21,13 +22,17 @@ char xApiKey[49] = "CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS";
 void setup(){
   
   //setup GSM driver pins
-  for(int i = 0 ; i < 3; i++){
-    pinMode(gsmDriverPin[i],OUTPUT);
-  }
+  //for(int i = 0 ; i < 3; i++){
+    //pinMode(gsmDriverPin[i],OUTPUT);
+  //}
+  pinMode(3,OUTPUT);
+  pinMode(4,OUTPUT);
+  pinMode(5,OUTPUT);
   
   digitalWrite(5,HIGH);//Output GSM Timing 
   delay(1500);
-  digitalWrite(5,LOW);  
+  digitalWrite(5,LOW);
+  delay(5000);  
   digitalWrite(3,LOW);//Enable the GSM mode
   digitalWrite(4,HIGH);//Disable the GPS mode
   delay(2000);
@@ -35,8 +40,26 @@ void setup(){
   Serial.begin(9600);
   delay(5000);//call ready & wait for comms 
   delay(5000);
-  delay(5000);
 
+  
+  Serial.println("AT+CMEE=1");
+  delay(2000); 
+  
+  Serial.println("AT+CGATT=1"); //attach gprs service
+  delay(2000);
+  
+  Serial.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\""); //Set bearer connection type
+  delay(2000);
+  
+  Serial.println("AT+SAPBR=3,1,\"APN\",\"wap.cingular\""); //set bearer mode
+  delay(2000);
+  
+  Serial.println("AT+SAPBR=3,1,\"USER\",\"wap@cingulargprs.com\""); //set bearer user
+  delay(2000);
+  
+  Serial.println("AT+SAPBR=3,1,\"PWD\",\"cingular1\""); //Set bearer pass
+  delay(2000);
+  
   //Teensy pin config
   //Mirf.cePin = 9;
   //Mirf.csnPin = 10;   
@@ -115,42 +138,25 @@ float pollSensor(){
 }
 
 void postData(float senseData){
-  
-  Serial.println("AT+CMEE=1");
-  delay(1000); 
-  
-  Serial.println("AT+CGATT=1"); //attach gprs service
-  delay(1000);
-  
-  Serial.println("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\""); //Set bearer connection type
-  delay(1000);
-  
-  Serial.println("AT+SAPBR=3,1,\"APN\",\"wap.cingular\""); //set bearer mode
-  delay(1000);
-  
-  Serial.println("AT+SAPBR=3,1,\"USER\",\"wap@cingulargprs.com\""); //set bearer user
-  delay(1000);
-  
-  Serial.println("AT+SAPBR=3,1,\"PWD\",\"cingular1\""); //Set bearer pass
-  delay(1000);
-  
+//  char serDat[25];
+ 
   Serial.println("AT+SAPBR=1,1"); //bring up connection
-  delay(1500);
+  delay(3000);
   
   Serial.println("AT+HTTPINIT"); //Init HTTP engine
   delay(1500);
-  
+
   //set URL
-  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=volts&DATA=\"");
+  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=volts&DATA=");
   Serial.print(senseData);
   Serial.println("\"");
   delay(1000);
-  
+
   Serial.println("AT+HTTPACTION=0"); //do HTTP get
-  delay(2500);
-  
+  delay(6000);
+
   Serial.println("AT+HTTPREAD");
-  delay(2500);
+  delay(2000);
 
   Serial.println("AT+HTTPTERM");
   delay(1000);
