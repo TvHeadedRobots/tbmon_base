@@ -86,7 +86,7 @@ void setup(){
 void loop(){
   
  postData(pollSensor());
- delay(10000);
+ delay(120000);
  
 }
 
