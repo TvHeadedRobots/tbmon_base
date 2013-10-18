@@ -90,6 +90,26 @@ void loop(){
  
 }
 
+void getIP() {
+  char ipAddr[16];
+  Serial.println("AT+SAPBR=1,1"); //bring up connection
+  delay(3000);
+  
+  Serial.println("AT+HTTPINIT"); //Init HTTP engine
+  delay(1500);
+  
+  Serial.println("AT+CIFSR"); //get IP address
+  
+  While(Serial.available()) {
+    
+  }
+    
+  }
+  
+  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=volts&DATA=");
+  Serial.println(ipAddr[]);
+}
+
 float pollSensor(){
  
   float data;
