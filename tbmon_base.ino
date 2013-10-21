@@ -11,6 +11,7 @@
 #include <MirfHardwareSpiDriver.h>
 
 
+
 //GSM driver pins
 byte gsmDriverPin[3] = {3,4,5};
 
@@ -81,8 +82,13 @@ void setup(){
   
   // Write channel and payload config then power up reciver.
   Mirf.config();
+  
+  
+  // Get IP address and post it
+  getIP();
 }
 
+// main loop
 void loop(){
   
  postData(pollSensor());
@@ -90,24 +96,59 @@ void loop(){
  
 }
 
+// function to get the current IP and update xevily
 void getIP() {
-  char ipAddr[16];
+  //char* ipAddr[];
+  char serData;
+  String stringIpAddr = "";
+  
   Serial.println("AT+SAPBR=1,1"); //bring up connection
   delay(3000);
+ 
+  Serial.flushRX(); 
+  Serial.println("AT+SAPBR=2,1"); //get IP address
+  delay(1000);
   
-  Serial.println("AT+HTTPINIT"); //Init HTTP engine
-  delay(1500);
-  
-  Serial.println("AT+CIFSR"); //get IP address
-  
-  While(Serial.available()) {
-    
-  }
-    
+  while (Serial.available() > 0) {
+    serData = Serial.read();
+    stringIpAddr += serData;
   }
   
-  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=volts&DATA=");
-  Serial.println(ipAddr[]);
+  if (stringIpAddr.indexOf("\"") > 0) {
+    //Serial.println(stringIpAddr);
+    stringIpAddr = stringIpAddr.substring(stringIpAddr.indexOf("\"") + 1, stringIpAddr.lastIndexOf("\"") - 1); 
+  }
+  /* loop through serail data and populate array
+  for (int i=0; i<15; i++){
+    
+    if (Serial.available()>0) {
+      ipAddr[i] = Serial.read(); // read serial char into arrray
+    } 
+    else {
+      break;
+    }
+      
+  }
+  */
+  
+  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=tbmon1&DATA=");
+  /*
+  for (int i=0; i<16; i++){
+    if (i<16) {
+      Serial.print(ipAddr[i]); 
+    }
+  }
+  */
+  Serial.print(stringIpAddr);
+  Serial.println("\"");
+  delay(1000);
+  
+  Serial.println("AT+HTTPREAD");
+  delay(2000);
+
+  Serial.println("AT+HTTPTERM");
+  delay(1000);
+
 }
 
 float pollSensor(){
