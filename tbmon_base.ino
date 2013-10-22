@@ -2,7 +2,9 @@
  * MIRF lib: https://github.com/aaronds/arduino-nrf24l01/tree/master/Mirf
  * NOTE: It may be necessary to modify MirfHardwareSpiDriver.cpp with; 
  * SPI.setClockDivider(SPI_CLOCK_DIV2);
- * to increase stability. 
+ * to increase stability on Freescale K series uC.
+ * NOTE: added flushRX() function declare to HardwareSerial.h & function to HardwareSerial.cpp
+ * flushRX() is the old <1.0 flush() function to clear the serial buffer.
  */
  
 #include <SPI.h>
@@ -23,12 +25,9 @@ char xApiKey[49] = "CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS";
 void setup(){
   
   //setup GSM driver pins
-  //for(int i = 0 ; i < 3; i++){
-    //pinMode(gsmDriverPin[i],OUTPUT);
-  //}
-  pinMode(3,OUTPUT);
-  pinMode(4,OUTPUT);
-  pinMode(5,OUTPUT);
+  for (int i = 0 ; i < 3; i++){
+    pinMode(gsmDriverPin[i],OUTPUT);
+  }
   
   digitalWrite(5,HIGH);//Output GSM Timing 
   delay(1500);
@@ -74,15 +73,11 @@ void setup(){
   // Configure reciving address.   
   Mirf.setRADDR((byte *)"tbmn1");
   
-  /*
-   * NB: payload on client and server must be the same.
-   */
-   
+  // payload on client and server must be the same. 
   Mirf.payload = sizeof(float);
   
   // Write channel and payload config then power up reciver.
   Mirf.config();
-  
   
   // Get IP address and post it
   getIP();
@@ -121,27 +116,9 @@ void getIP() {
     //Serial.println(stringIpAddr);
     stringIpAddr = stringIpAddr.substring(stringIpAddr.indexOf("\"") + 1, stringIpAddr.lastIndexOf("\"") - 1); 
   }
-  /* loop through serail data and populate array
-  for (int i=0; i<15; i++){
-    
-    if (Serial.available()>0) {
-      ipAddr[i] = Serial.read(); // read serial char into arrray
-    } 
-    else {
-      break;
-    }
-      
-  }
-  */
   
   Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=IPAddr&DATA=");
-  /*
-  for (int i=0; i<16; i++){
-    if (i<16) {
-      Serial.print(ipAddr[i]); 
-    }
-  }
-  */
+
   Serial.print(stringIpAddr);
   Serial.println("\"");
   delay(1000);
@@ -163,41 +140,25 @@ float pollSensor(){
   
   /*
    * If a packet has been recived.
-   *
    * isSending also restores listening mode when it 
    * transitions from true to false.
    */
    
   if(!Mirf.isSending() && Mirf.dataReady()){
-    //Serial.println("Got packet");
     
-    /*
-     * Get load the packet into the buffer.
-     */
-     
+    // load the packet into the buffer.        
     Mirf.getData((byte *)&data);
-    
-    //Serial.println(data);
-    /*
-     * Set the send address.
-     */
-     
-     
+   
+    // Set the send address.
     Mirf.setTADDR((byte *)"volt1");
     
-    /*
-     * Send the data back to the client.
-     */
-     
+    // Send the data back to the client.     
     Mirf.send((byte *)&data);
     
     /*
      * Wait untill sending has finished
-     *
      * NB: isSending returns the chip to receving after returning true.
      */
-      
-    //Serial.println("Reply sent.");
     
     return data;
   }
