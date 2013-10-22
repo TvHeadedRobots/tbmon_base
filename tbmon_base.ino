@@ -104,6 +104,9 @@ void getIP() {
   
   Serial.println("AT+SAPBR=1,1"); //bring up connection
   delay(3000);
+  
+  Serial.println("AT+HTTPINIT"); //Init HTTP engine
+  delay(1500);
  
   Serial.flushRX(); 
   Serial.println("AT+SAPBR=2,1"); //get IP address
@@ -131,7 +134,7 @@ void getIP() {
   }
   */
   
-  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=tbmon1&DATA=");
+  Serial.print("AT+HTTPPARA=\"URL\",\"ec2-54-242-171-87.compute-1.amazonaws.com/xively/xivelyPut.php?X-ApiKey=CAhdALe5DFe3xjtcUTdFk0HqWAOwB8xCM3tiLsZqaBVen0zS&chan=IPAddr&DATA=");
   /*
   for (int i=0; i<16; i++){
     if (i<16) {
@@ -145,6 +148,9 @@ void getIP() {
   
   Serial.println("AT+HTTPREAD");
   delay(2000);
+  
+  Serial.println("AT+HTTPACTION=0"); //do HTTP get
+  delay(6000);  
 
   Serial.println("AT+HTTPTERM");
   delay(1000);
